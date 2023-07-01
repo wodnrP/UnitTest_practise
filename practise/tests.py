@@ -1,10 +1,8 @@
-from django.test import TestCase
+from django.test import (TestCase, Client)
 import json
 from django.urls import reverse
-from django.test import (TestCase, Client, RequestFactory)
 from rest_framework.test import APIClient
 from .models import User
-from rest_framework.authtoken.models import Token
 # Create your tests here.
 
 #회원가입 기능 관련 테스트케이스
