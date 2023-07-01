@@ -2,6 +2,8 @@
 
 해당 프로젝트는 Swagger_practise를 copy하여 일부 변경한 프로젝트입니다.
 
+[개인 블로그 참조](https://velog.io/@wodnr_09/Django-UnitTest-%ED%99%9C%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0)
+
 ---
 
 **Requirements**
