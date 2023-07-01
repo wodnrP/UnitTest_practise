@@ -158,8 +158,8 @@ class UserInfoPatchTest(TestCase):
             profile = None
         )
         self.user.set_password('asdf1234')
-
         self.user.save()
+
     def tearDown(self):
         User.objects.all().delete()
     
@@ -183,5 +183,75 @@ class UserInfoPatchTest(TestCase):
         }
 
         response = self.client.patch(reverse('user-info'), user_update)
+        self.assertEqual(response.status_code, 200)
+
+    # 사용자 정보 수정 테스트 : 잘못된 이미지 encoding 타입 
+    def test_userinfo_failed(self):
+        login_user = {
+            "username" : "infoTestUser",
+            "password" : "asdf1234",
+        }
+
+        login_response = self.client.post(reverse('login'), 
+        data=login_user, format='json')
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {login_response.json()['access_token']}"
+        )
+
+        # 수정할 데이터 : 수정할 프로필 이미지의 encoding 타입이 다른 경우 
+        user_update = {
+            'profile' : 'profile_error'
+        }
+
+        response = self.client.patch(reverse('user-info'), user_update)
+        self.assertEqual(response.status_code, 400)
+
+    # 토큰이 없는 경우
+    def test_userinfo_nottoken(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {''}"
+        )
+        response = self.client.patch(reverse('user-info'), content_type='application/json')
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json(), { 'detail' : 'unauthenticated'})
+
+# refresh token API 테스트
+class RefreshLoginTest(TestCase):
+    def setUp(self):
+        self.client = APIClient(enforce_csrf_checks=True)
+        self.maxDiff = None
+        
+        self.user = User.objects.create(
+            id = 1,
+            username = "refreshTestUser",
+            nickname = "refresh테스트사용자",
+            profile = None
+        )
+        self.user.set_password('qwer1234')
+        self.user.save()
+
+    def tearDown(self):
+        User.objects.all().delete()
+
+    def test_refreshtoken(self):
+        login_user = {
+        "username" : "refreshTestUser",
+        "password" : "qwer1234",
+        }
+
+        # 사용자 로그인
+        login_response = self.client.post(reverse('login'), 
+        data=login_user, format='json')
+
+        # 사용자의 refresh_token
+        token = {
+            'refresh_token' : login_response.json()['refresh_token']
+        }
+        
+        response = self.client.post(
+            reverse('refresh'), json.dumps(token), content_type='application/json'
+            )
+
         self.assertEqual(response.status_code, 200)
 
